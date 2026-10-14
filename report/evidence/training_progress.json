@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-14",
+  "dataset_version": "d10-21e4070301",
+  "scope": "interim_training_progress_not_score_output",
+  "data": {
+    "status": "complete",
+    "session_leakage_check": "pass",
+    "coordinate_roundtrip_check": "pass",
+    "counts": {
+      "train": {"images": 1422, "pothole": 1074, "crack": 1750, "manhole": 691},
+      "val": {"images": 276, "pothole": 66, "crack": 470, "manhole": 103},
+      "test": {"images": 311, "pothole": 121, "crack": 299, "manhole": 163}
+    },
+    "visual_evidence": "report/evidence/sample_boxes.png"
+  },
+  "experiments": {
+    "E0": {"status": "not_run", "score_evidence": null},
+    "E1": {
+      "status": "training_complete_evaluation_pending",
+      "matched_lora_modules": 252,
+      "meta": {"trainable_params": 33030144, "peak_vram_gb": 10.88, "train_minutes": 53.8},
+      "local_artifact": {
+        "path": "work/adapters/e1/adapter_model.safetensors",
+        "bytes": 132195448,
+        "sha256": "65d1ea698e2fe6acb51b67a4a73c07780097321a8354ad4b623e1836d10b17cd",
+        "committed": false
+      },
+      "score_evidence": null
+    },
+    "E2": {
+      "status": "training_complete_evaluation_pending",
+      "matched_lora_modules": 252,
+      "projector_trainable_params": 109105152,
+      "meta": {"trainable_params": 142135296, "peak_vram_gb": 13.79, "train_minutes": 54.4},
+      "local_artifacts": [
+        {
+          "path": "work/adapters/e2/adapter_model.safetensors",
+          "bytes": 132195448,
+          "sha256": "142810d369b43d10017943395d64366bf9bb15618ead70637b2161db0f1407e6",
+          "committed": false
+        },
+        {
+          "path": "work/adapters/e2/extra_trainable.pt",
+          "bytes": 436429707,
+          "sha256": "ad2f37dea36b9ee50c98bddc525679bc67fd0b8d1ac4b7ccf3289efd730eb09b",
+          "committed": false
+        }
+      ],
+      "score_evidence": null
+    },
+    "E3": {
+      "status": "blocked_cuda_oom_then_colab_quota_exhausted",
+      "matched_lora_modules": 348,
+      "completed_meta": null,
+      "score_evidence": null
+    },
+    "E4": {"status": "not_started", "score_evidence": null}
+  },
+  "notes": [
+    "This file is an interim audit record, not an output from scripts/score.py.",
+    "No F1, CI95, or per-class metric is claimed before test inference is complete.",
+    "Model weights and adapters are intentionally excluded from Git by .gitignore and the submission rubric."
+  ]
+}
