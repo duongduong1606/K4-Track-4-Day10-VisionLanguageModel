@@ -1,6 +1,8 @@
 # Bằng chứng hiện có
 
 - `sample_boxes.png`: sáu ảnh ground-truth dùng để kiểm tra dữ liệu và cách vẽ box.
-- `training_progress.json`: bản ghi trung gian về split, E1/E2 đã huấn luyện, E3 bị dừng và hash của artifact local.
+- `e0.json`: kết quả E0 do `scripts/score.py` sinh từ đủ 311 prediction test.
+- `e0_examples.png`: sáu ảnh test với ground-truth màu xanh và prediction E0 màu đỏ.
+- `training_progress.json`: bản ghi trung gian về split, E1/E2/E3 đã huấn luyện và hash của artifact local.
 
-`training_progress.json` **không phải** kết quả từ `scripts/score.py`. Tại thời điểm cập nhật, chưa có prediction test nên chưa tạo `e0.json`–`e3.json` và không công bố F1/CI95. Các adapter nằm trong `work/`, bị loại khỏi Git đúng yêu cầu không commit trọng số.
+`training_progress.json` **không phải** kết quả từ `scripts/score.py`. Tại thời điểm cập nhật đã có `e0.json`; E1–E3 chưa inference test nên chưa có `e1.json`–`e3.json`. Các adapter nằm trong `work/`, bị loại khỏi Git đúng yêu cầu không commit trọng số.

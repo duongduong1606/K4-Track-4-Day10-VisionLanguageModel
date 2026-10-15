@@ -1,19 +1,19 @@
 Họ tên: Dương Dương
 `dataset_version`: `d10-21e4070301`
 
-> Trạng thái báo cáo ngày 14/10/2026: đã chuẩn bị dữ liệu, kiểm tra trực quan và huấn luyện xong E1/E2. Chưa sinh prediction trên test nên chưa có F1/CI95. E3 dừng vì CUDA OOM trên T4 14.56 GB, sau đó Colab hết hạn mức. Các ô chưa chạy được ghi rõ, không nội suy kết quả.
+> Trạng thái báo cáo ngày 15/10/2026: đã chuẩn bị dữ liệu, kiểm tra trực quan, chạy E0 và huấn luyện xong E1/E2/E3. E0 đã được chấm trên đủ 311 ảnh test; E1–E3 chưa chạy inference test nên chưa có F1/CI95. Các ô chưa chạy được ghi rõ, không nội suy kết quả.
 
 ## Bảng tổng hợp (số của bạn, lấy từ `report/evidence/*.json`)
 
 | Mã | Setup | Tham số huấn luyện | VRAM đỉnh (GB) | Phút | F1 | CI95 | FP/ảnh | F1 pothole | F1 crack | F1 manhole |
 |---|---|---:|---:|---:|---:|---|---:|---:|---:|---:|
-| E0 | zero-shot | 0 | Chưa đo | Chưa đo | Chưa chạy | Chưa chạy | Chưa chạy | Chưa chạy | Chưa chạy | Chưa chạy |
+| E0 | zero-shot | 0 | — | — | 0.1077 | [0.0812, 0.1369] | 0.8360 | 0.1032 | 0.0526 | 0.2231 |
 | E1 | LoRA LLM | 33,030,144 | 10.88 | 53.8 | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm |
 | E2 | LoRA LLM + projector | 142,135,296 | 13.79 | 54.4 | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm |
-| E3 | E2 + LoRA ViT | Chưa hoàn thành | OOM trên T4 14.56 GB | Chưa hoàn thành | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm |
+| E3 | E2 + LoRA ViT | 148,426,752 | 7.47 | 66.1 | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm |
 | E4 | Chưa bắt đầu | — | — | — | — | — | — | — | — | — |
 
-Nguồn số liệu huấn luyện E1/E2 là `work/adapters/e1/run.json` và `work/adapters/e2/run.json`; bản tóm tắt có thể commit nằm ở `report/evidence/training_progress.json`. Adapter/trọng số nằm trong `work/` và được `.gitignore` loại khỏi Git đúng quy định.
+Nguồn điểm E0 là `report/evidence/e0.json`; nguồn số liệu huấn luyện E1/E2/E3 là các file `work/adapters/e*/run.json`. Bản tóm tắt có thể commit nằm ở `report/evidence/training_progress.json`. Adapter/trọng số nằm trong `work/` và được `.gitignore` loại khỏi Git đúng quy định.
 
 ## 10 câu hỏi (trả lời bằng **số của bạn**, không chép lại tài liệu)
 
@@ -23,11 +23,17 @@ Theo cây module và phép đếm dùng trong notebook, Qwen3-VL-4B có tổng k
 
 - E1 cập nhật LoRA trên 252 linear của LLM; tổng trainable **33,030,144**.
 - E2 giữ LoRA LLM như E1 và cập nhật đầy đủ projector float32; tổng trainable **142,135,296**.
-- E3 dự kiến thêm LoRA trên 96 linear của ViT, thành 348 module LoRA, đồng thời vẫn cập nhật projector. E3 chưa huấn luyện xong nên chưa ghi tổng trainable từ một run hoàn chỉnh.
+- E3 thêm LoRA trên 96 linear của ViT, thành 348 module LoRA, đồng thời vẫn cập nhật projector; tổng trainable **148,426,752**, nhiều hơn E2 **6,291,456** tham số LoRA ViT.
 
 ### Câu 2 — E0: `parse_valid_rate` bằng bao nhiêu, và hai lỗi phổ biến nhất của model gốc là gì (kèm một ví dụ output thô)?
 
-E0 chưa được suy luận trên 311 ảnh test, vì vậy chưa có `parse_valid_rate` hay output thô để phân loại lỗi. Không thể kết luận hai lỗi phổ biến nhất trước khi có `work/e0.jsonl`; đây là mục cần hoàn tất ở lượt GPU tiếp theo.
+E0 có `parse_valid_rate = 0.9357`, tức 291/311 output parse được và 20 output hỏng. Hai lỗi định lượng nổi bật là bỏ sót box (**535 FN**, recall 0.0823) và dự đoán dư (**260 FP**, trong đó crack chiếm 182 FP). Ví dụ output thô hợp lệ của ảnh `vlcsnap-00200`:
+
+```json
+[{"label":"manhole","bbox_2d":[770,640,845,690]},{"label":"manhole","bbox_2d":[907,786,1000,824]}]
+```
+
+Toàn bộ E0 đạt precision 0.1558, recall 0.0823 và F1 0.1077. Sáu ví dụ có box thật/dự đoán được lưu trong `report/evidence/e0_examples.png`.
 
 ### Câu 3 — Thang 0–1000: nếu chấm output theo pixel (hoặc ngược lại) thì F1 ra sao và vì sao? Bạn đã kiểm chứng điều này thế nào?
 
@@ -57,15 +63,15 @@ Các frame trong cùng phiên quay gần nhau về mặt đường, góc máy, �
 
 ### Câu 7 — So sánh E1/E2/E3: mở projector và LoRA trên ViT có đáng không (F1, CI95, VRAM, thời gian)?
 
-Hiện chỉ có thể so chi phí huấn luyện, chưa thể kết luận “đáng” về chất lượng vì chưa có prediction test. E2 tăng trainable từ **33,030,144** lên **142,135,296** (+109,105,152), VRAM từ **10.88** lên **13.79 GB** (+2.91 GB), trong khi thời gian đo được tăng từ **53.8** lên **54.4 phút** (+0.6 phút). E3 đã match đủ 348 module nhưng OOM trên T4 14.56 GB, nên chưa có metadata run hoàn chỉnh. Chỉ sau khi có F1 và CI95 E1–E3 mới có thể đánh đổi mức cải thiện với chi phí này.
+Hiện chỉ có thể so chi phí huấn luyện, chưa thể kết luận “đáng” về chất lượng vì E1–E3 chưa có prediction test. E2 tăng trainable từ **33,030,144** lên **142,135,296** (+109,105,152), VRAM từ **10.88** lên **13.79 GB** (+2.91 GB), trong khi thời gian tăng từ **53.8** lên **54.4 phút** (+0.6 phút). E3 có **148,426,752** trainable (+6,291,456 so với E2), mất **66.1 phút** và ghi nhận đỉnh **7.47 GB**. Con số VRAM E3 thấp hơn vì run này dùng micro-batch 1 và accumulation 8, còn E1/E2 dùng batch 2 và accumulation 4, nên không phải phép so sánh cùng cấu hình. Chỉ sau khi có F1 và CI95 E1–E3 mới có thể đánh đổi mức cải thiện với chi phí này.
 
 ### Câu 8 — Tập test có 311 ảnh: khoảng tin cậy rộng thế nào, và điều đó giới hạn kết luận so sánh các setup ra sao?
 
-Chưa thể đưa độ rộng CI bằng số vì chưa có prediction để bootstrap. Với 311 ảnh, CI phải được bootstrap theo ảnh như `score.py`; không được tính như thể 583 box độc lập vì các box trong cùng ảnh có tương quan. Khi hoàn tất, chỉ nên khẳng định setup tốt hơn nếu mức tăng đủ lớn so với độ rộng và mức chồng lấn CI; chênh lệch F1 nhỏ trong các CI chồng nhau chỉ là tín hiệu, chưa phải bằng chứng chắc chắn.
+Với E0, CI95 bootstrap theo ảnh là **[0.0812, 0.1369]**, rộng khoảng **0.0557 F1**. Khoảng này phải bootstrap theo 311 ảnh như `score.py`; không được tính như thể 583 box độc lập vì các box trong cùng ảnh có tương quan. Khi có E1–E3, chỉ nên khẳng định setup tốt hơn nếu mức tăng đủ lớn so với độ rộng và mức chồng lấn CI; chênh lệch F1 nhỏ trong các CI chồng nhau chỉ là tín hiệu, chưa phải bằng chứng chắc chắn.
 
 ### Câu 9 — Phân tích lỗi theo lớp: lớp nào kém nhất và vì sao (kích thước box, số mẫu, ngữ nghĩa)? Kèm ảnh minh hoạ.
 
-Chưa thể xác định lớp kém nhất nếu không có `per_class` từ scorer. Dữ liệu cho thấy mất cân bằng đáng kể: train có 1,750 crack, 1,074 pothole nhưng chỉ 691 manhole; test có lần lượt 299, 121 và 163 box. Tuy nhiên số mẫu một mình không đủ để suy ra F1: crack thường dài/mảnh, pothole có biên mơ hồ, còn manhole dễ nhầm với cấu trúc tròn trên mặt đường. `report/evidence/sample_boxes.png` minh họa sáu ảnh ground-truth hiện có; ảnh prediction đúng/sai sẽ được bổ sung sau inference.
+Ở E0, **crack kém nhất với F1 0.0526** (13 TP, 182 FP, 286 FN), sau đó là pothole 0.1032 và manhole 0.2231. Crack thường dài, mảnh, biên không rõ và dễ lẫn với vạch/vết mặt đường, phù hợp việc vừa bỏ sót nhiều vừa tạo nhiều false positive. Kết luận này mới áp dụng cho E0; cần chấm E1–E3 để biết fine-tuning có đổi thứ tự lớp hay không. `report/evidence/e0_examples.png` minh họa ba mẫu có TP và ba mẫu lỗi, với ground-truth màu xanh và prediction E0 màu đỏ.
 
 ### Câu 10 — E4: bạn đổi biến nào, kết quả thế nào, và kết luận có đáng tin không?
 
@@ -73,6 +79,6 @@ E4 chưa bắt đầu vì E0–E3 chưa được chấm và chưa xác định s
 
 ## Nhìn lại
 
-Phần đã hoàn thành gồm chuẩn bị split không rò rỉ, kiểm tra nhãn/thang tọa độ bằng hình, hoàn thiện pipeline LoRA, lưu adapter E1 và lưu cả LoRA lẫn projector của E2. Các lỗi thực tế đã gặp là: cấu hình skip module khiến lần đầu chỉ mở 54,579,200 tham số projector; `torchao 0.10.0` không tương thích PEFT; E3 OOM trên T4; Colab hết hạn mức; và môi trường Windows gặp encoding `cp1252`/quyền thư mục tạm của pytest.
+Phần đã hoàn thành gồm chuẩn bị split không rò rỉ, kiểm tra nhãn/thang tọa độ bằng hình, chạy và chấm E0, hoàn thiện pipeline LoRA, lưu adapter E1, và lưu cả LoRA lẫn projector của E2/E3. E3 cuối cùng chạy được khi giảm micro-batch còn 1, tăng gradient accumulation lên 8 và đặt `foreach=False` cho AdamW. Các lỗi thực tế đã gặp là: cấu hình skip module khiến lần đầu chỉ mở 54,579,200 tham số projector; `torchao 0.10.0` không tương thích PEFT; E3 từng OOM trên T4; Colab hết hạn mức; và môi trường Windows gặp encoding `cp1252`/quyền thư mục tạm của pytest.
 
-Giới hạn lớn nhất của báo cáo hiện tại là chưa có `e0.json`–`e3.json`, do đó mọi câu cần F1, CI95, FP/ảnh và phân tích lỗi đều được đánh dấu chưa chấm. Bước tiếp theo là phục hồi E1/E2, chạy inference test, hoàn tất E3 trên GPU đủ bộ nhớ, rồi mới chọn và chạy E4.
+Giới hạn lớn nhất của báo cáo hiện tại là mới có `e0.json`; E1–E3 đã train nhưng chưa inference/chấm, và E4 chưa bắt đầu. Bước tiếp theo là chạy inference test bằng ba adapter đã lưu, tạo `e1.json`–`e3.json`, rồi chọn setup tốt nhất để chạy E4.

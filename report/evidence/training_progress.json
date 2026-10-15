@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "recorded_at": "2026-10-14",
+  "recorded_at": "2026-10-15",
   "dataset_version": "d10-21e4070301",
   "scope": "interim_training_progress_not_score_output",
   "data": {
@@ -15,7 +15,17 @@
     "visual_evidence": "report/evidence/sample_boxes.png"
   },
   "experiments": {
-    "E0": {"status": "not_run", "score_evidence": null},
+    "E0": {
+      "status": "evaluation_complete",
+      "prediction_rows": 311,
+      "score_evidence": "report/evidence/e0.json",
+      "metrics": {
+        "parse_valid_rate": 0.9356913183279743,
+        "f1": 0.10774410774410775,
+        "f1_ci95": [0.08122941822173435, 0.13692480359147025],
+        "fp_per_image": 0.8360128617363344
+      }
+    },
     "E1": {
       "status": "training_complete_evaluation_pending",
       "matched_lora_modules": 252,
@@ -50,16 +60,30 @@
       "score_evidence": null
     },
     "E3": {
-      "status": "blocked_cuda_oom_then_colab_quota_exhausted",
+      "status": "training_complete_evaluation_pending",
       "matched_lora_modules": 348,
-      "completed_meta": null,
+      "meta": {"trainable_params": 148426752, "peak_vram_gb": 7.47, "train_minutes": 66.1},
+      "local_artifacts": [
+        {
+          "path": "work/adapters/e3/adapter_model.safetensors",
+          "bytes": 157387928,
+          "sha256": "4d28f32c9df800e1cc992b58b8d5311b4e0d350ca5beec1786dbdf438787a5fc",
+          "committed": false
+        },
+        {
+          "path": "work/adapters/e3/extra_trainable.pt",
+          "bytes": 436429707,
+          "sha256": "7a6e774d34bc6b82325f6615672e67ed2543e6db0cb56b4a8aa293256101dc10",
+          "committed": false
+        }
+      ],
       "score_evidence": null
     },
     "E4": {"status": "not_started", "score_evidence": null}
   },
   "notes": [
     "This file is an interim audit record, not an output from scripts/score.py.",
-    "No F1, CI95, or per-class metric is claimed before test inference is complete.",
+    "E0 F1, CI95, and per-class metrics come from scripts/score.py; E1-E3 metrics remain pending.",
     "Model weights and adapters are intentionally excluded from Git by .gitignore and the submission rubric."
   ]
 }
