@@ -1,19 +1,20 @@
 Họ tên: Dương Dương
 `dataset_version`: `d10-21e4070301`
 
-> Trạng thái báo cáo ngày 15/10/2026: đã chuẩn bị dữ liệu, kiểm tra trực quan, chạy E0 và huấn luyện xong E1/E2/E3. E0 đã được chấm trên đủ 311 ảnh test; E1–E3 chưa chạy inference test nên chưa có F1/CI95. Các ô chưa chạy được ghi rõ, không nội suy kết quả.
+> Trạng thái báo cáo ngày 15/10/2026: đã hoàn thành E0–E3 và ablation E4 rank 4/rank 64. Tất cả sáu cấu hình đã được chấm trên đủ 311 ảnh test bằng cùng `dataset_version`; số liệu dưới đây được tái tạo trực tiếp từ prediction thô bằng `scripts/score.py`.
 
 ## Bảng tổng hợp (số của bạn, lấy từ `report/evidence/*.json`)
 
 | Mã | Setup | Tham số huấn luyện | VRAM đỉnh (GB) | Phút | F1 | CI95 | FP/ảnh | F1 pothole | F1 crack | F1 manhole |
 |---|---|---:|---:|---:|---:|---|---:|---:|---:|---:|
 | E0 | zero-shot | 0 | — | — | 0.1077 | [0.0812, 0.1369] | 0.8360 | 0.1032 | 0.0526 | 0.2231 |
-| E1 | LoRA LLM | 33,030,144 | 10.88 | 53.8 | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm |
-| E2 | LoRA LLM + projector | 142,135,296 | 13.79 | 54.4 | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm |
-| E3 | E2 + LoRA ViT | 148,426,752 | 7.47 | 66.1 | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm | Chưa chấm |
-| E4 | Chưa bắt đầu | — | — | — | — | — | — | — | — | — |
+| E1 | LoRA LLM | 33,030,144 | 10.88 | 53.8 | 0.2806 | [0.2470, 0.3195] | 1.2186 | 0.1684 | 0.2235 | 0.5116 |
+| E2 | LoRA LLM + projector | 142,135,296 | 13.79 | 54.4 | 0.3419 | [0.3018, 0.3835] | 1.1511 | 0.2081 | 0.2790 | 0.5942 |
+| E3 | E2 + LoRA ViT (r=16) | 148,426,752 | 7.47 | 66.1 | 0.4305 | [0.3897, 0.4713] | 0.8103 | 0.2304 | 0.3728 | 0.6689 |
+| E4a | E3, rank=4 | 118,935,552 | 8.30 | 65.8 | 0.4335 | [0.3900, 0.4771] | 0.8328 | 0.2791 | 0.3546 | 0.6959 |
+| E4b | E3, rank=64 | 266,391,552 | 9.45 | 68.2 | 0.4396 | [0.3989, 0.4843] | 0.7846 | 0.3229 | 0.3492 | 0.6844 |
 
-Nguồn điểm E0 là `report/evidence/e0.json`; nguồn số liệu huấn luyện E1/E2/E3 là các file `work/adapters/e*/run.json`. Bản tóm tắt có thể commit nằm ở `report/evidence/training_progress.json`. Adapter/trọng số nằm trong `work/` và được `.gitignore` loại khỏi Git đúng quy định.
+Nguồn điểm là sáu JSON trong `report/evidence/`; nguồn tài nguyên huấn luyện là các file `work/adapters/*/run.json`. Bản tóm tắt có thể commit nằm ở `report/evidence/training_progress.json`. Adapter/trọng số và prediction thô nằm trong `work/`, được `.gitignore` loại khỏi Git đúng quy định.
 
 ## 10 câu hỏi (trả lời bằng **số của bạn**, không chép lại tài liệu)
 
@@ -63,22 +64,24 @@ Các frame trong cùng phiên quay gần nhau về mặt đường, góc máy, �
 
 ### Câu 7 — So sánh E1/E2/E3: mở projector và LoRA trên ViT có đáng không (F1, CI95, VRAM, thời gian)?
 
-Hiện chỉ có thể so chi phí huấn luyện, chưa thể kết luận “đáng” về chất lượng vì E1–E3 chưa có prediction test. E2 tăng trainable từ **33,030,144** lên **142,135,296** (+109,105,152), VRAM từ **10.88** lên **13.79 GB** (+2.91 GB), trong khi thời gian tăng từ **53.8** lên **54.4 phút** (+0.6 phút). E3 có **148,426,752** trainable (+6,291,456 so với E2), mất **66.1 phút** và ghi nhận đỉnh **7.47 GB**. Con số VRAM E3 thấp hơn vì run này dùng micro-batch 1 và accumulation 8, còn E1/E2 dùng batch 2 và accumulation 4, nên không phải phép so sánh cùng cấu hình. Chỉ sau khi có F1 và CI95 E1–E3 mới có thể đánh đổi mức cải thiện với chi phí này.
+E1 tăng F1 từ **0.1077** lên **0.2806** (+0.1729), vượt yêu cầu +0.10 và hai CI không chồng lấn. Mở projector ở E2 tăng F1 thêm **0.0612** lên 0.3419, nhưng đổi lại +109,105,152 tham số trainable và +2.91 GB VRAM; CI E1/E2 còn chồng nhẹ nên bằng chứng cho phần tăng này chưa mạnh. E3 tăng thêm **0.0886** lên 0.4305, giảm FP/ảnh từ 1.1511 xuống 0.8103; CI E2 kết thúc ở 0.3835 còn CI E3 bắt đầu ở 0.3897, nên LoRA ViT cho cải thiện rõ nhất sau E1.
+
+Về chi phí, E3 có 148,426,752 trainable và mất 66.1 phút. Đỉnh VRAM E3 là 7.47 GB, thấp hơn E1/E2 vì E3 dùng micro-batch 1, accumulation 8, còn E1/E2 dùng batch 2, accumulation 4; vì vậy không thể quy chênh lệch VRAM chỉ cho kiến trúc. Trong ba setup chính, E3 đáng chọn nhất theo chất lượng, nhưng tốn thêm khoảng 11.7 phút so với E2.
 
 ### Câu 8 — Tập test có 311 ảnh: khoảng tin cậy rộng thế nào, và điều đó giới hạn kết luận so sánh các setup ra sao?
 
-Với E0, CI95 bootstrap theo ảnh là **[0.0812, 0.1369]**, rộng khoảng **0.0557 F1**. Khoảng này phải bootstrap theo 311 ảnh như `score.py`; không được tính như thể 583 box độc lập vì các box trong cùng ảnh có tương quan. Khi có E1–E3, chỉ nên khẳng định setup tốt hơn nếu mức tăng đủ lớn so với độ rộng và mức chồng lấn CI; chênh lệch F1 nhỏ trong các CI chồng nhau chỉ là tín hiệu, chưa phải bằng chứng chắc chắn.
+CI95 bootstrap theo ảnh rộng từ **0.0557** ở E0 đến khoảng **0.0871 F1** ở E4 rank 4. Cụ thể: E1 rộng 0.0725, E2 0.0818, E3 0.0816, E4-r4 0.0871 và E4-r64 0.0854. Khoảng này phải bootstrap theo 311 ảnh như `score.py`; không được tính như thể 583 box độc lập vì các box trong cùng ảnh có tương quan. Do CI của hai E4 và E3 chồng lấn gần như toàn bộ, chênh lệch vài phần nghìn giữa chúng không đủ cho kết luận rank cao tốt hơn.
 
 ### Câu 9 — Phân tích lỗi theo lớp: lớp nào kém nhất và vì sao (kích thước box, số mẫu, ngữ nghĩa)? Kèm ảnh minh hoạ.
 
-Ở E0, **crack kém nhất với F1 0.0526** (13 TP, 182 FP, 286 FN), sau đó là pothole 0.1032 và manhole 0.2231. Crack thường dài, mảnh, biên không rõ và dễ lẫn với vạch/vết mặt đường, phù hợp việc vừa bỏ sót nhiều vừa tạo nhiều false positive. Kết luận này mới áp dụng cho E0; cần chấm E1–E3 để biết fine-tuning có đổi thứ tự lớp hay không. `report/evidence/e0_examples.png` minh họa ba mẫu có TP và ba mẫu lỗi, với ground-truth màu xanh và prediction E0 màu đỏ.
+Ở E0, crack kém nhất với F1 0.0526 do 182 FP và 286 FN. Sau fine-tuning, pothole trở thành lớp kém nhất ở E1–E4; trên model tốt nhất E4 rank 64, F1 pothole là **0.3229**, thấp hơn crack 0.3492 và manhole 0.6844. Pothole có ít box train hơn crack (1,074 so với 1,750), biên và hình dạng biến đổi mạnh, dễ hòa vào texture mặt đường. Crack dài/mảnh vẫn khó định vị chính xác, còn manhole có hình học rõ nên cao nhất ở mọi setup. `report/evidence/prediction_examples.png` minh họa ba mẫu có TP và ba mẫu lỗi của E4 rank 64; ground-truth màu xanh, prediction màu đỏ.
 
 ### Câu 10 — E4: bạn đổi biến nào, kết quả thế nào, và kết luận có đáng tin không?
 
-E4 chưa bắt đầu vì E0–E3 chưa được chấm và chưa xác định setup nền tốt nhất. Không có kết quả ablation để kết luận ở tiến độ hiện tại.
+E4 giữ nguyên setup E3 và chỉ đổi LoRA rank: r=4/alpha=8 so với r=64/alpha=128. Rank 4 đạt F1 **0.4335**, CI95 [0.3900, 0.4771]; rank 64 đạt **0.4396**, CI95 [0.3989, 0.4843]. Chênh lệch chỉ **0.0061**, trong khi CI chồng lấn mạnh. Rank 64 cần 266,391,552 trainable, cao hơn rank 4 tới 147,456,000, thêm 1.15 GB VRAM và 2.4 phút. Vì vậy chưa có bằng chứng rank 64 đáng chi phí; rank 4 là lựa chọn hiệu quả hơn trong thí nghiệm này.
 
 ## Nhìn lại
 
-Phần đã hoàn thành gồm chuẩn bị split không rò rỉ, kiểm tra nhãn/thang tọa độ bằng hình, chạy và chấm E0, hoàn thiện pipeline LoRA, lưu adapter E1, và lưu cả LoRA lẫn projector của E2/E3. E3 cuối cùng chạy được khi giảm micro-batch còn 1, tăng gradient accumulation lên 8 và đặt `foreach=False` cho AdamW. Các lỗi thực tế đã gặp là: cấu hình skip module khiến lần đầu chỉ mở 54,579,200 tham số projector; `torchao 0.10.0` không tương thích PEFT; E3 từng OOM trên T4; Colab hết hạn mức; và môi trường Windows gặp encoding `cp1252`/quyền thư mục tạm của pytest.
+Phần đã hoàn thành gồm split không rò rỉ, kiểm tra nhãn/thang tọa độ, E0–E3, E4 rank 4/rank 64, lưu đầy đủ prediction, score và adapter. E3/E4 chạy được khi giảm micro-batch còn 1, tăng gradient accumulation lên 8 và đặt `foreach=False` cho AdamW. Các lỗi thực tế đã gặp là: cấu hình skip module khiến lần đầu chỉ mở 54,579,200 tham số projector; `torchao 0.10.0` không tương thích PEFT; OOM do model inference cũ còn giữ VRAM; Colab hết hạn mức; và môi trường Windows gặp encoding `cp1252`/quyền thư mục tạm của pytest.
 
-Giới hạn lớn nhất của báo cáo hiện tại là mới có `e0.json`; E1–E3 đã train nhưng chưa inference/chấm, và E4 chưa bắt đầu. Bước tiếp theo là chạy inference test bằng ba adapter đã lưu, tạo `e1.json`–`e3.json`, rồi chọn setup tốt nhất để chạy E4.
+Giới hạn còn lại là tập test chỉ có 311 ảnh và các CI E3/E4 còn rộng, nên không thể kết luận chênh lệch nhỏ giữa các rank sẽ lặp lại trên dữ liệu mới. Ngoài ra, VRAM giữa E1/E2 và E3/E4 dùng micro-batch khác nhau nên chỉ là nhật ký thực nghiệm, không phải benchmark kiến trúc được kiểm soát hoàn toàn.

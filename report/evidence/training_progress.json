@@ -2,7 +2,6 @@
   "schema_version": 1,
   "recorded_at": "2026-10-15",
   "dataset_version": "d10-21e4070301",
-  "scope": "interim_training_progress_not_score_output",
   "data": {
     "status": "complete",
     "session_leakage_check": "pass",
@@ -11,79 +10,78 @@
       "train": {"images": 1422, "pothole": 1074, "crack": 1750, "manhole": 691},
       "val": {"images": 276, "pothole": 66, "crack": 470, "manhole": 103},
       "test": {"images": 311, "pothole": 121, "crack": 299, "manhole": 163}
-    },
-    "visual_evidence": "report/evidence/sample_boxes.png"
+    }
   },
   "experiments": {
     "E0": {
-      "status": "evaluation_complete",
+      "status": "complete",
       "prediction_rows": 311,
       "score_evidence": "report/evidence/e0.json",
-      "metrics": {
-        "parse_valid_rate": 0.9356913183279743,
-        "f1": 0.10774410774410775,
-        "f1_ci95": [0.08122941822173435, 0.13692480359147025],
-        "fp_per_image": 0.8360128617363344
-      }
+      "f1": 0.10774410774410775
     },
     "E1": {
-      "status": "training_complete_evaluation_pending",
+      "status": "complete",
       "matched_lora_modules": 252,
       "meta": {"trainable_params": 33030144, "peak_vram_gb": 10.88, "train_minutes": 53.8},
-      "local_artifact": {
-        "path": "work/adapters/e1/adapter_model.safetensors",
-        "bytes": 132195448,
-        "sha256": "65d1ea698e2fe6acb51b67a4a73c07780097321a8354ad4b623e1836d10b17cd",
-        "committed": false
-      },
-      "score_evidence": null
+      "score_evidence": "report/evidence/e1.json",
+      "f1": 0.2806076854334226,
+      "artifacts": [
+        {"path": "work/adapters/e1/adapter_model.safetensors", "bytes": 132195448, "sha256": "65d1ea698e2fe6acb51b67a4a73c07780097321a8354ad4b623e1836d10b17cd", "committed": false}
+      ]
     },
     "E2": {
-      "status": "training_complete_evaluation_pending",
+      "status": "complete",
       "matched_lora_modules": 252,
-      "projector_trainable_params": 109105152,
       "meta": {"trainable_params": 142135296, "peak_vram_gb": 13.79, "train_minutes": 54.4},
-      "local_artifacts": [
-        {
-          "path": "work/adapters/e2/adapter_model.safetensors",
-          "bytes": 132195448,
-          "sha256": "142810d369b43d10017943395d64366bf9bb15618ead70637b2161db0f1407e6",
-          "committed": false
-        },
-        {
-          "path": "work/adapters/e2/extra_trainable.pt",
-          "bytes": 436429707,
-          "sha256": "ad2f37dea36b9ee50c98bddc525679bc67fd0b8d1ac4b7ccf3289efd730eb09b",
-          "committed": false
-        }
-      ],
-      "score_evidence": null
+      "score_evidence": "report/evidence/e2.json",
+      "f1": 0.3418502202643172,
+      "artifacts": [
+        {"path": "work/adapters/e2/adapter_model.safetensors", "bytes": 132195448, "sha256": "142810d369b43d10017943395d64366bf9bb15618ead70637b2161db0f1407e6", "committed": false},
+        {"path": "work/adapters/e2/extra_trainable.pt", "bytes": 436429707, "sha256": "ad2f37dea36b9ee50c98bddc525679bc67fd0b8d1ac4b7ccf3289efd730eb09b", "committed": false}
+      ]
     },
     "E3": {
-      "status": "training_complete_evaluation_pending",
+      "status": "complete",
       "matched_lora_modules": 348,
       "meta": {"trainable_params": 148426752, "peak_vram_gb": 7.47, "train_minutes": 66.1},
-      "local_artifacts": [
-        {
-          "path": "work/adapters/e3/adapter_model.safetensors",
-          "bytes": 157387928,
-          "sha256": "4d28f32c9df800e1cc992b58b8d5311b4e0d350ca5beec1786dbdf438787a5fc",
-          "committed": false
-        },
-        {
-          "path": "work/adapters/e3/extra_trainable.pt",
-          "bytes": 436429707,
-          "sha256": "7a6e774d34bc6b82325f6615672e67ed2543e6db0cb56b4a8aa293256101dc10",
-          "committed": false
-        }
-      ],
-      "score_evidence": null
+      "score_evidence": "report/evidence/e3.json",
+      "f1": 0.4304511278195489,
+      "artifacts": [
+        {"path": "work/adapters/e3/adapter_model.safetensors", "bytes": 157387928, "sha256": "4d28f32c9df800e1cc992b58b8d5311b4e0d350ca5beec1786dbdf438787a5fc", "committed": false},
+        {"path": "work/adapters/e3/extra_trainable.pt", "bytes": 436429707, "sha256": "7a6e774d34bc6b82325f6615672e67ed2543e6db0cb56b4a8aa293256101dc10", "committed": false}
+      ]
     },
-    "E4": {"status": "not_started", "score_evidence": null}
+    "E4_rank_4": {
+      "status": "complete",
+      "base_setup": "E3",
+      "changed_variable": "lora_rank",
+      "rank": 4,
+      "lora_alpha": 8,
+      "meta": {"trainable_params": 118935552, "peak_vram_gb": 8.3, "train_minutes": 65.8},
+      "score_evidence": "report/evidence/e4_rank_4.json",
+      "f1": 0.43348837209302327,
+      "artifacts": [
+        {"path": "work/adapters/e4_rank_4/adapter_model.safetensors", "bytes": 39421552, "sha256": "2a1327f8ac1dc90337d219ffb24199c6b7b46add5d18c53b772d9ae4e13b54ba", "committed": false},
+        {"path": "work/adapters/e4_rank_4/extra_trainable.pt", "bytes": 436429707, "sha256": "76a7ee2371ad1ece43fad2c8f00b091a3340b5b09fc72451d1b29cfc0ed0f05c", "committed": false}
+      ]
+    },
+    "E4_rank_64": {
+      "status": "complete",
+      "base_setup": "E3",
+      "changed_variable": "lora_rank",
+      "rank": 64,
+      "lora_alpha": 128,
+      "meta": {"trainable_params": 266391552, "peak_vram_gb": 9.45, "train_minutes": 68.2},
+      "score_evidence": "report/evidence/e4_rank_64.json",
+      "f1": 0.43962264150943403,
+      "artifacts": [
+        {"path": "work/adapters/e4_rank_64/adapter_model.safetensors", "bytes": 629247768, "sha256": "189f5c61e1d0edfd8acb0c2d44611830e745b460ca9ea4417b40462e810fb055", "committed": false},
+        {"path": "work/adapters/e4_rank_64/extra_trainable.pt", "bytes": 436429707, "sha256": "e13ff9a79b1d967132cdd7a93720813031cbb3cd3d263c16e0db7fb3230cddb", "committed": false}
+      ]
+    }
   },
   "notes": [
-    "This file is an interim audit record, not an output from scripts/score.py.",
-    "E0 F1, CI95, and per-class metrics come from scripts/score.py; E1-E3 metrics remain pending.",
-    "Model weights and adapters are intentionally excluded from Git by .gitignore and the submission rubric."
+    "All score JSON files were regenerated from the raw predictions with scripts/score.py.",
+    "Weights, adapters and raw predictions remain under work/ and are intentionally excluded from Git."
   ]
 }
